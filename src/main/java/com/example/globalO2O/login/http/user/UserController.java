@@ -70,7 +70,8 @@ public class UserController {
 
     @PostMapping("/account/duplication")
     public ResponseEntity<AccountResponseDto> checkDuplication(@Valid @RequestBody AccontRequestDto userDto) {
-        return ResponseEntity.ok(userService.withdraw(userDto.getLoginId(), userDto.getNickname()));
+        String result = userService.checkDuplication(userDto.getLoginId(), userDto.getNickname());
+        return ResponseEntity.ok(new AccountResponseDto(result));
     }
 
     @PostMapping("/auth/account/withdrawal")
@@ -79,5 +80,12 @@ public class UserController {
         return ResponseEntity.ok(userService.signOut(accountSignInDto.getLoginId()));
     }
 
-
+//    @PostMapping("/auth/account/update")
+//    public ResponseEntity update(@Valid @RequestBody AccontRequestDto userDto) {
+//        String result = userService.checkDuplication(userDto.getLoginId(), userDto.getNickname());
+//        if (result.equals("available")) {
+//            userService.resetLoginIdAndNickname(userDto.getLoginId(), userDto.getNickname());
+//
+//        }
+//    }
 }

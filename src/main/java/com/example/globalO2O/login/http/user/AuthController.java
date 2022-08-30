@@ -74,16 +74,10 @@ public class AuthController {
     }
 
     @PostMapping("/email-auth/account/email/code")
-    public ResponseEntity validateAuthCode(@Valid @RequestBody CodeDto codeDto, @RequestHeader(name = "Authorization") String token) {
-        log.info("token: {}", token);
+    public ResponseEntity validateAuthCode(@Valid @RequestBody CodeDto codeDto, HttpServletRequest request) {
+        String token = getAuthorizationToken(request);
 
-        token = token.split(" ")[1].trim();
-
-        log.info("token.split(\" \")[1].trim(): {}", token);
-
-        if (!tokenProvider.validateToken(token)) {
-            return ResponseEntity.badRequest().body("유효하지 않은 토큰입니다.");
-        }
+        tokenProvider.validateToken(token);
 
         String email = tokenProvider.parseToken(token).getSubject();
 
@@ -103,6 +97,7 @@ public class AuthController {
     @PostMapping("/account/password/email")
     public ResponseEntity identifyByEmail(@Valid @RequestBody EmailRequestDto emailRequestDto) {
         if (userRepository.findByEmail(emailRequestDto.getEmail()).isEmpty()) {
+            log.error("해당 이메일주소로 등록된 사용자가 존재하지 않습니다.");
             return ResponseEntity.badRequest().body("해당 이메일주소로 등록된 사용자가 존재하지 않습니다.");
         }
 
@@ -112,12 +107,10 @@ public class AuthController {
     }
 
     @PostMapping("/email-auth/account/password/email/code")
-    public ResponseEntity validateAuthCodeForPassword(@Valid @RequestBody CodeDto codeDto, @RequestHeader(name = "Authorization") String token) {
-        token = token.substring(7);
+    public ResponseEntity validateAuthCodeForPassword(@Valid @RequestBody CodeDto codeDto, HttpServletRequest request) {
+        String token = getAuthorizationToken(request);
 
-        if (!tokenProvider.validateToken(token)) {
-            return ResponseEntity.badRequest().body("유효하지 않은 토큰입니다.");
-        }
+        tokenProvider.validateToken(token);
 
         String email = tokenProvider.parseToken(token).getSubject();
 
@@ -135,5 +128,10 @@ public class AuthController {
         emailAuthCodeMap.put(email, authCode);
 
         log.info("emailAuthCodeMap.get(email): {}", emailAuthCodeMap.get(email));
+    }
+
+    private String getAuthorizationToken(HttpServletRequest request) {
+        String headerValue = request.getHeader("Authorization");
+        return headerValue.substring(headerValue.indexOf(' ') + 1);
     }
 }

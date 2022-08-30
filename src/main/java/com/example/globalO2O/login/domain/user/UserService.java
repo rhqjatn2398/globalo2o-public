@@ -55,15 +55,14 @@ public class UserService {
         return AccontRequestDto.from(SecurityUtil.getCurrentLoginId().flatMap(userRepository::findOneWithAuthoritiesByLoginId).orElse(null));
     }
 
-    public AccountResponseDto withdraw(String loginId, String nickname) {
-        AccountResponseDto accountResponseDto = new AccountResponseDto();
-        if (userRepository.findByLoginIdOrNickname(loginId, nickname).orElse(null) == null) {
-            accountResponseDto.setResult("success");
+    public String checkDuplication(String loginId, String nickname) {
+        if (userRepository.existsByLoginId(loginId)) {
+            return "id";
+        } else if (userRepository.existsByNickname(nickname)){
+            return "nickname";
         } else {
-            accountResponseDto.setResult("fail");
+            return "available";
         }
-
-        return accountResponseDto;
     }
 
     @Transactional
