@@ -47,10 +47,10 @@ public class BoardController {
 
     @PostMapping("/board/search")
     public ResponseEntity<BoardResponseDto> search(@Valid @RequestBody BoardRequestDto boardRequestDto) {
-        if (boardRequestDto.getCategory() == 10) {
-            return ResponseEntity.ok(hotBoardService.getBoard(boardRequestDto));
-        } else {
+        if (boardRequestDto.getCategory() == null || boardRequestDto.getCategory() != 10) {
             return ResponseEntity.ok(boardService.searchBoard(boardRequestDto));
+        } else {
+            return ResponseEntity.ok(hotBoardService.getBoard(boardRequestDto));
         }
 
     }
