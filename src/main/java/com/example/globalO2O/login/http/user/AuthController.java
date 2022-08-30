@@ -9,6 +9,7 @@ import com.example.globalO2O.login.http.jwt.TokenProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -61,7 +62,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 아이디와 비밀번호가 일치하지 않습니다.");
         }
 
-        return new ResponseEntity<>(new TokenDto(user.getId(), user.getNickname(), user.getName(), user.getEmail(), jwt), httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(new TokenDto(user.getId(), user.getLoginId(), user.getNickname(), user.getName(), user.getEmail(), jwt), httpHeaders, HttpStatus.OK);
     }
 
     @PostMapping("/account/email")
@@ -72,12 +73,14 @@ public class AuthController {
     }
 
     @PostMapping("/email-auth/account/email/code")
-    public ResponseEntity validateAuthCode(@Valid @RequestBody CodeDto codeDto, @RequestHeader(name = "Authorization") String token) {
+    public ResponseEntity validateAuthCode(@Valid @RequestBody CodeDto codeDto, @RequestHeader(name = "Authorization") String token, HttpRequest httpRequest) {
+        log.info("httpRequest.getHeaders().get(\"Authorization\") {}" + httpRequest.getHeaders().get("Authorization"));
+
         log.info("token: {}", token);
 
         token = token.split(" ")[1].trim();
 
-        log.info("token.substring(7): {}", token);
+        log.info("token.split(\" \")[1].trim()", token);
 
         if (!tokenProvider.validateToken(token)) {
             return ResponseEntity.badRequest().body("유효하지 않은 토큰입니다.");

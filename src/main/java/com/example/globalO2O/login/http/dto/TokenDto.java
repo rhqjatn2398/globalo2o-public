@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TokenDto {
     private Long uid;
+    private String id;
     private String nickname;
     private String name;
     private String email;
