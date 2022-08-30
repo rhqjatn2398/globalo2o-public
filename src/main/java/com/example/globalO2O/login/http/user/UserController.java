@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @Slf4j
@@ -27,8 +28,8 @@ public class UserController {
     }
 
     @PostMapping("/email-auth/account/sign_up")
-    public ResponseEntity signup(@Valid @RequestBody AccontRequestDto userDto, @RequestHeader(name = "Authorization") String token) {
-        token = token.split(" ")[1].trim();
+    public ResponseEntity signup(@Valid @RequestBody AccontRequestDto userDto, HttpServletRequest request) {
+        String token = getAuthorizationToken(request);
 
         if (!tokenProvider.validateToken(token)) {
             return ResponseEntity.badRequest().body("유효하지 않은 토큰입니다.");
@@ -50,8 +51,8 @@ public class UserController {
     }
 
     @PostMapping("/email-auth/password/reset")
-    public ResponseEntity<String> resetPassword(@Valid @RequestBody PasswordDto passwordDto, @RequestHeader (name="Authorization") String token) {
-        token = token.split(" ")[1].trim();
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody PasswordDto passwordDto, HttpServletRequest request) {
+        String token = getAuthorizationToken(request);
 
         if (!tokenProvider.validateToken(token)) {
             return ResponseEntity.badRequest().body("유효하지 않은 토큰입니다.");
@@ -88,4 +89,9 @@ public class UserController {
 //
 //        }
 //    }
+
+    private String getAuthorizationToken(HttpServletRequest request) {
+        String headerValue = request.getHeader("Authorization");
+        return headerValue.substring(headerValue.indexOf(' ') + 1);
+    }
 }
