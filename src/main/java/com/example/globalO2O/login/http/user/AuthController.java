@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,14 +74,12 @@ public class AuthController {
     }
 
     @PostMapping("/email-auth/account/email/code")
-    public ResponseEntity validateAuthCode(@Valid @RequestBody CodeDto codeDto, @RequestHeader(name = "Authorization") String token, HttpRequest httpRequest) {
-        log.info("httpRequest.getHeaders().get(\"Authorization\") {}" + httpRequest.getHeaders().get("Authorization"));
-
+    public ResponseEntity validateAuthCode(@Valid @RequestBody CodeDto codeDto, @RequestHeader(name = "Authorization") String token) {
         log.info("token: {}", token);
 
         token = token.split(" ")[1].trim();
 
-        log.info("token.split(\" \")[1].trim()", token);
+        log.info("token.split(\" \")[1].trim(): {}", token);
 
         if (!tokenProvider.validateToken(token)) {
             return ResponseEntity.badRequest().body("유효하지 않은 토큰입니다.");
