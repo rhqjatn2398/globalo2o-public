@@ -85,10 +85,11 @@ public class UserController {
     public ResponseEntity update(@Valid @RequestBody AccountRequestDto userDto, @AuthenticationPrincipal User user) {
         String result = userService.checkDuplication(userDto.getNickname());
         if (result.equals("available")) {
-            userService.resetNameAndNickname(user.getUsername(), userDto.getName(), user.getUsername());
-            return ResponseEntity.ok("success");
+            userService.resetNameAndNickname(user.getUsername(), userDto.getName(), userDto.getNickname());
+        } else {
+            userService.resetName(user.getUsername(), userDto.getName());
         }
-        return ResponseEntity.badRequest().body("중복되는 닉네임입니다.");
+        return ResponseEntity.ok("success");
     }
 
     private String getAuthorizationToken(HttpServletRequest request) {

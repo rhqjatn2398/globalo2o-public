@@ -87,4 +87,11 @@ public class UserService {
         user.setNickname(nickname);
         return userRepository.save(user);
     }
+
+    @Transactional
+    public User resetName(String loginId, String name) {
+        User user = userRepository.findOneWithAuthoritiesByLoginId(loginId).orElseThrow();
+        user.setName(name);
+        return userRepository.save(user);
+    }
 }
