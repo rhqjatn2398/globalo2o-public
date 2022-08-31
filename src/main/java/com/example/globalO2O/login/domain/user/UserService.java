@@ -81,17 +81,19 @@ public class UserService {
     }
 
     @Transactional
-    public User resetNameAndNickname(String loginId, String name, String nickname) {
+    public User resetNameAndNicknameAndPassword(String loginId, String name, String nickname, String password) {
         User user = userRepository.findOneWithAuthoritiesByLoginId(loginId).orElseThrow();
         user.setName(name);
         user.setNickname(nickname);
+        user.setPassword(passwordEncoder.encode(password));
         return userRepository.save(user);
     }
 
     @Transactional
-    public User resetName(String loginId, String name) {
+    public User resetNameAndPassword(String loginId, String name, String password) {
         User user = userRepository.findOneWithAuthoritiesByLoginId(loginId).orElseThrow();
         user.setName(name);
+        user.setPassword(passwordEncoder.encode(password));
         return userRepository.save(user);
     }
 }

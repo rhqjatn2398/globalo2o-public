@@ -85,9 +85,9 @@ public class UserController {
     public ResponseEntity update(@Valid @RequestBody AccountRequestDto userDto, @AuthenticationPrincipal User user) {
         String result = userService.checkDuplication(userDto.getNickname());
         if (result.equals("available")) {
-            userService.resetNameAndNickname(user.getUsername(), userDto.getName(), userDto.getNickname());
+            userService.resetNameAndNicknameAndPassword(user.getUsername(), userDto.getName(), userDto.getNickname(), userDto.getPassword());
         } else {
-            userService.resetName(user.getUsername(), userDto.getName());
+            userService.resetNameAndPassword(user.getUsername(), userDto.getName(), userDto.getPassword());
         }
         return ResponseEntity.ok("success");
     }
