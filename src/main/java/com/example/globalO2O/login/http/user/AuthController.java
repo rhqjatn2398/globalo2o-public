@@ -85,8 +85,11 @@ public class AuthController {
         log.info("codeDto: {}", codeDto.getCode());
         log.info("map: {}", emailAuthCodeMap.get(email));
 
+        if (!emailAuthCodeMap.containsKey(email)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("먼저 인증번호 발송을 수행해주세요.");
+        }
 
-        if (emailAuthCodeMap.containsKey(email) && emailAuthCodeMap.get(email).equals(codeDto.getCode())) {
+        if (emailAuthCodeMap.get(email).equals(codeDto.getCode())) {
             emailAuthCodeMap.remove(email);
             return ResponseEntity.ok(new EmailTokenDto(tokenProvider.createEmailToken(email, true)));
         }
@@ -113,6 +116,10 @@ public class AuthController {
         tokenProvider.validateToken(token);
 
         String email = tokenProvider.parseToken(token).getSubject();
+
+        if (!emailAuthCodeMap.containsKey(email)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("먼저 인증번호 발송을 수행해주세요.");
+        }
 
         if (emailAuthCodeMap.get(email).equals(codeDto.getCode())) {
             emailAuthCodeMap.remove(email);

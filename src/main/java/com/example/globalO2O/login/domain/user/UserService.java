@@ -1,8 +1,7 @@
 package com.example.globalO2O.login.domain.user;
 
 import com.example.globalO2O.login.domain.exception.DuplicateMemberException;
-import com.example.globalO2O.login.http.dto.AccontRequestDto;
-import com.example.globalO2O.login.http.dto.AccountResponseDto;
+import com.example.globalO2O.login.http.dto.AccountRequestDto;
 import com.example.globalO2O.login.http.dto.PasswordDto;
 import com.example.globalO2O.login.http.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,7 @@ public class UserService {
     }
 
     @Transactional
-    public AccontRequestDto signup(AccontRequestDto userDto, String email) throws DuplicateMemberException {
+    public AccountRequestDto signup(AccountRequestDto userDto, String email) throws DuplicateMemberException {
         if (userRepository.findOneWithAuthoritiesByLoginId(userDto.getLoginId()).orElse(null) != null) {
             throw new DuplicateMemberException("이미 가입되어 있는 유저입니다.");
         }
@@ -42,23 +41,21 @@ public class UserService {
                 .activated(true)
                 .build();
 
-        return AccontRequestDto.from(userRepository.save(user));
+        return AccountRequestDto.from(userRepository.save(user));
     }
 
     @Transactional(readOnly = true)
-    public AccontRequestDto getUserWithAuthorities(String loginId) {
-        return AccontRequestDto.from(userRepository.findOneWithAuthoritiesByLoginId(loginId).orElse(null));
+    public AccountRequestDto getUserWithAuthorities(String loginId) {
+        return AccountRequestDto.from(userRepository.findOneWithAuthoritiesByLoginId(loginId).orElse(null));
     }
 
     @Transactional(readOnly = true)
-    public AccontRequestDto getMyUserWithAuthorities() {
-        return AccontRequestDto.from(SecurityUtil.getCurrentLoginId().flatMap(userRepository::findOneWithAuthoritiesByLoginId).orElse(null));
+    public AccountRequestDto getMyUserWithAuthorities() {
+        return AccountRequestDto.from(SecurityUtil.getCurrentLoginId().flatMap(userRepository::findOneWithAuthoritiesByLoginId).orElse(null));
     }
 
-    public String checkDuplication(String loginId, String nickname) {
-        if (userRepository.existsByLoginId(loginId)) {
-            return "id";
-        } else if (userRepository.existsByNickname(nickname)){
+    public String checkDuplication(String nickname) {
+        if (userRepository.existsByNickname(nickname)){
             return "nickname";
         } else {
             return "available";
@@ -79,9 +76,15 @@ public class UserService {
     @Transactional
     public User resetPassword(PasswordDto passwordDto, String email) {
         User user = userRepository.findByEmail(email).orElseThrow();
-
         user.setPassword(passwordEncoder.encode(passwordDto.getPassword()));
+        return userRepository.save(user);
+    }
 
+    @Transactional
+    public User resetNameAndNickname(String loginId, String name, String nickname) {
+        User user = userRepository.findOneWithAuthoritiesByLoginId(loginId).orElseThrow();
+        user.setName(name);
+        user.setNickname(nickname);
         return userRepository.save(user);
     }
 }

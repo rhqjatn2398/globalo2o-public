@@ -28,7 +28,7 @@ public class UserController {
     }
 
     @PostMapping("/email-auth/account/sign_up")
-    public ResponseEntity signup(@Valid @RequestBody AccontRequestDto userDto, HttpServletRequest request) {
+    public ResponseEntity signup(@Valid @RequestBody AccountRequestDto userDto, HttpServletRequest request) {
         String token = getAuthorizationToken(request);
 
         if (!tokenProvider.validateToken(token)) {
@@ -70,25 +70,26 @@ public class UserController {
     }
 
     @PostMapping("/account/duplication")
-    public ResponseEntity<AccountResponseDto> checkDuplication(@Valid @RequestBody AccontRequestDto userDto) {
-        String result = userService.checkDuplication(userDto.getLoginId(), userDto.getNickname());
+    public ResponseEntity<AccountResponseDto> checkNicknameDuplication(@Valid @RequestBody AccountRequestDto userDto) {
+        String result = userService.checkDuplication(userDto.getNickname());
         return ResponseEntity.ok(new AccountResponseDto(result));
     }
 
     @PostMapping("/auth/account/withdrawal")
     public ResponseEntity<Boolean> withdrawal(@Valid @RequestBody AccountSignInDto accountSignInDto, @AuthenticationPrincipal User user) {
-        // TODO: 일치여부 확인
+        // TODO: 일치여부 확인 해야 하나? 안해도 되지 않나?
         return ResponseEntity.ok(userService.signOut(accountSignInDto.getLoginId()));
     }
 
-//    @PostMapping("/auth/account/update")
-//    public ResponseEntity update(@Valid @RequestBody AccontRequestDto userDto) {
-//        String result = userService.checkDuplication(userDto.getLoginId(), userDto.getNickname());
-//        if (result.equals("available")) {
-//            userService.resetLoginIdAndNickname(userDto.getLoginId(), userDto.getNickname());
-//
-//        }
-//    }
+    @PostMapping("/auth/account/update")
+    public ResponseEntity update(@Valid @RequestBody AccountRequestDto userDto, @AuthenticationPrincipal User user) {
+        String result = userService.checkDuplication(userDto.getNickname());
+        if (result.equals("available")) {
+            userService.resetNameAndNickname(user.getUsername(), userDto.getName(), user.getUsername());
+            return ResponseEntity.ok("success");
+        }
+        return ResponseEntity.badRequest().body("중복되는 닉네임입니다.");
+    }
 
     private String getAuthorizationToken(HttpServletRequest request) {
         String headerValue = request.getHeader("Authorization");

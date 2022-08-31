@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccontRequestDto {
+public class AccountRequestDto {
     @NotNull
     private String loginId; // Unique
     @NotNull
@@ -26,10 +26,10 @@ public class AccontRequestDto {
 
     private Set<AuthorityDto> authorityDtoSet;
 
-    public static AccontRequestDto from(User user) {
+    public static AccountRequestDto from(User user) {
         if (user == null) return null;
 
-        return AccontRequestDto.builder()
+        return AccountRequestDto.builder()
                 .loginId(user.getLoginId())
                 .nickname(user.getNickname())
                 .authorityDtoSet(user.getAuthorities().stream()
